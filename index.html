@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#fff7ed">
+    <meta name="description" content="A birthday love note for my favorite person.">
+    <title>Happy Birthday, My Love!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main>
+        <p class="eyebrow">To my favorite person</p>
+        <h1>Happy <span>Birthday,</span> My Love!</h1>
+        <span class="cake" role="img" aria-label="Birthday cake">🎂</span>
+
+        <p class="message">
+            Happy birthday to the one who makes my world brighter just by being in it.
+            I hope your day is full of laughter, little surprises, and all the love you
+            give so freely. I’m so lucky to have you. Here’s to making many more
+            beautiful memories together. I love you Whitney! 💖
+        </p>
+
+        <p class="wish">
+            Make a wish, birthday love. You deserve the whole universe. ✨
+        </p>
+        
+        <section class="gallery" aria-labelledby="gallery-title">
+            <h2 id="gallery-title">Our favorite memories 📸</h2>
+            <p class="photo-instructions">
+                Pick a memory to see one of our favorite moments together.
+            </p>
+            <div class="memory-buttons" id="memory-buttons"
+                 role="group" aria-label="Choose a memory"></div>
+            <img class="memory-media memory-image" id="memory-image"
+                 alt="" hidden>
+            <video class="memory-media memory-video" id="memory-video"
+                   controls playsinline preload="metadata" hidden></video>
+            <p class="photo-status" id="photo-status" aria-live="polite"></p>
+            <a class="video-fallback" id="video-fallback"
+               href="memories/2026-11-24-152930797.mp4" hidden>
+                Open the video in another player
+            </a>
+        </section>
+        <br>
+        <button type="button" id="surprise">Celebrate!</button>
+        <p class="footer">Forever grateful for you. Here’s to another year of us. 💕</p>
+    </main>
+    <script>
+        const colors = ["#f05f8d", "#ffad66", "#ffd166", "#9b8bea", "#69c9b0"];
+
+        for (let i = 0; i < 24; i += 1) {
+            const piece = document.createElement("i");
+            piece.className = "confetti";
+            piece.setAttribute("aria-hidden", "true");
+            piece.style.setProperty("--left", `${Math.random() * 100}vw`);
+            piece.style.setProperty("--color", colors[i % colors.length]);
+            piece.style.setProperty("--tilt", `${Math.random() * 180}deg`);
+            piece.style.setProperty("--duration", `${7 + Math.random() * 9}s`);
+            piece.style.setProperty("--delay", `${-Math.random() * 15}s`);
+            document.body.append(piece);
+        }
+
+        const memories = [
+            { file: "IMG_20261009_092521_251.jpg", type: "image" },
+            { file: "IMG_20261009_092647_443.jpg", type: "image" },
+            { file: "IMG_20261009_193101_663.jpg", type: "image" },
+            { file: "IMG_20261009_195609_193.jpg", type: "image" },
+            { file: "IMG_20261009_201308_180.jpg", type: "image" },
+            { file: "IMG_20261010_213243_752.jpg", type: "image" },
+            { file: "IMG_20261010_223214_278.jpg", type: "image" },
+            { file: "2026-11-24-152930797.mp4", type: "video" }
+        ];
+        const memoryButtons = document.querySelector("#memory-buttons");
+        const memoryImage = document.querySelector("#memory-image");
+        const memoryVideo = document.querySelector("#memory-video");
+        const photoStatus = document.querySelector("#photo-status");
+        const videoFallback = document.querySelector("#video-fallback");
+        let selectedMemory = 0;
+
+        function showMemory(index) {
+            selectedMemory = index;
+            const memory = memories[index];
+            const label = `Memory ${index + 1}`;
+
+            memoryButtons.querySelectorAll("button").forEach((button, buttonIndex) => {
+                button.setAttribute("aria-pressed", String(buttonIndex === index));
+            });
+            memoryImage.hidden = true;
+            memoryVideo.hidden = true;
+            videoFallback.hidden = true;
+            memoryVideo.pause();
+            photoStatus.textContent = `Showing ${label} of ${memories.length}.`;
+
+            if (memory.type === "video") {
+                memoryVideo.src = `memories/${memory.file}`;
+                memoryVideo.hidden = false;
+                return;
+            }
+
+            memoryImage.alt = `${label}, a favorite moment together`;
+            memoryImage.src = `memories/${memory.file}`;
+        }
+
+        memoryImage.addEventListener("load", () => {
+            if (memories[selectedMemory].type === "image") {
+                memoryImage.hidden = false;
+            }
+        });
+        memoryImage.addEventListener("error", () => {
+            if (memories[selectedMemory].type === "image") {
+                memoryImage.hidden = true;
+                photoStatus.textContent = "This memory could not be loaded.";
+            }
+        });
+        memoryVideo.addEventListener("error", () => {
+            if (memories[selectedMemory].type === "video") {
+                memoryVideo.hidden = true;
+                photoStatus.textContent = "This video could not be played in this browser.";
+                videoFallback.hidden = false;
+            }
+        });
+
+        memories.forEach((memory, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = `Memory ${index + 1}`;
+            button.setAttribute("aria-pressed", "false");
+            button.addEventListener("click", () => showMemory(index));
+            memoryButtons.append(button);
+        });
+        showMemory(0);
+
+        document.querySelector("#surprise").addEventListener("click", () => {
+            for (let i = 0; i < 70; i += 1) {
+                const piece = document.createElement("i");
+                piece.className = "pop";
+                piece.textContent = ["✦", "●", "♥", "★"][i % 4];
+                piece.setAttribute("aria-hidden", "true");
+                piece.style.left = `${Math.random() * 100}vw`;
+                piece.style.color = colors[i % colors.length];
+                piece.style.fontSize = `${12 + Math.random() * 18}px`;
+                piece.style.setProperty("--drift", `${Math.random() * 160 - 80}px`);
+                document.body.append(piece);
+                piece.addEventListener("animationend", () => piece.remove(), { once: true });
+            }
+        });
+    </script>
+</body>
+</html>
