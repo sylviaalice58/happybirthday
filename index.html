@@ -24,6 +24,13 @@
         <p class="wish">
             Make a wish, birthday love. You deserve the whole universe. ✨
         </p>
+
+        <section class="song-player" aria-label="Birthday song">
+            <button type="button" id="play-song">Play Happy Birthday</button>
+            <p id="song-status" aria-live="polite">
+                If autoplay is blocked, tap anywhere to start the song.
+            </p>
+        </section>
         
         <section class="gallery" aria-labelledby="gallery-title">
             <h2 id="gallery-title">Our favorite memories 📸</h2>
@@ -60,6 +67,103 @@
             piece.style.setProperty("--delay", `${-Math.random() * 15}s`);
             document.body.append(piece);
         }
+
+        const playSongButton = document.querySelector("#play-song");
+        const songStatus = document.querySelector("#song-status");
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        const birthdayNotes = [
+            [392, 0.75], [392, 0.25], [440, 1], [392, 1], [523.25, 1], [493.88, 2],
+            [392, 0.75], [392, 0.25], [440, 1], [392, 1], [587.33, 1], [523.25, 2],
+            [392, 0.75], [392, 0.25], [783.99, 1], [659.25, 1], [523.25, 1],
+            [493.88, 1], [440, 2],
+            [698.46, 0.75], [698.46, 0.25], [659.25, 1], [523.25, 1],
+            [587.33, 1], [523.25, 2]
+        ];
+        let songAudioContext;
+        let songPlaying = false;
+
+        function playBirthdaySong() {
+            if (songPlaying) {
+                return;
+            }
+
+            songPlaying = true;
+            playSongButton.disabled = true;
+            songStatus.textContent = "Playing Happy Birthday!";
+            let noteStart = songAudioContext.currentTime + 0.05;
+            let lastNote;
+
+            birthdayNotes.forEach(([frequency, beats], index) => {
+                const duration = beats * 0.42;
+                const oscillator = songAudioContext.createOscillator();
+                const volume = songAudioContext.createGain();
+                const noteEnd = noteStart + duration;
+
+                oscillator.type = "sine";
+                oscillator.frequency.value = frequency;
+                volume.gain.setValueAtTime(0.0001, noteStart);
+                volume.gain.exponentialRampToValueAtTime(0.16, noteStart + 0.025);
+                volume.gain.setValueAtTime(0.16, noteEnd - 0.04);
+                volume.gain.exponentialRampToValueAtTime(0.0001, noteEnd);
+                oscillator.connect(volume);
+                volume.connect(songAudioContext.destination);
+                oscillator.start(noteStart);
+                oscillator.stop(noteEnd);
+
+                if (index === birthdayNotes.length - 1) {
+                    lastNote = oscillator;
+                }
+                noteStart = noteEnd;
+            });
+
+            lastNote.addEventListener("ended", () => {
+                songPlaying = false;
+                playSongButton.disabled = false;
+                playSongButton.textContent = "Play birthday song again";
+                songStatus.textContent = "Happy Birthday! 💖";
+            }, { once: true });
+        }
+
+        function startBirthdaySong() {
+            if (songPlaying) {
+                return;
+            }
+            if (!AudioContextClass) {
+                songStatus.textContent = "This browser does not support audio playback.";
+                return;
+            }
+
+            try {
+                if (!songAudioContext) {
+                    songAudioContext = new AudioContextClass();
+                }
+                songAudioContext.resume().then(() => {
+                    if (songAudioContext.state === "running") {
+                        playBirthdaySong();
+                    } else if (!songPlaying) {
+                        songStatus.textContent = "Autoplay was blocked. Tap anywhere or press the button to play the song.";
+                        playSongButton.disabled = false;
+                    }
+                }).catch(() => {
+                    if (!songPlaying) {
+                        songStatus.textContent = "Autoplay was blocked. Tap anywhere or press the button to play the song.";
+                        playSongButton.disabled = false;
+                    }
+                });
+                if (songAudioContext.state !== "running") {
+                    songStatus.textContent = "Autoplay may be blocked. Tap anywhere or press the button to start the song.";
+                    playSongButton.disabled = false;
+                }
+            } catch {
+                songStatus.textContent = "Audio could not start. Tap the button to try again.";
+                playSongButton.disabled = false;
+            }
+        }
+
+        playSongButton.addEventListener("click", startBirthdaySong);
+        document.addEventListener("pointerdown", startBirthdaySong, { once: true });
+        document.addEventListener("keydown", startBirthdaySong, { once: true });
+        startBirthdaySong();
 
         const memories = [
             { file: "IMG_20261009_092521_251.jpg", type: "image" },

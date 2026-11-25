@@ -189,6 +189,25 @@
             font-weight: 700;
         }
 
+        .song-player {
+            margin-top: 20px;
+        }
+
+        .song-player button {
+            margin-top: 0;
+        }
+
+        #song-status {
+            margin: 9px 0 0;
+            color: #8d798e;
+            font-size: .85rem;
+        }
+
+        .song-player button:disabled {
+            cursor: default;
+            opacity: .8;
+        }
+
         button {
             margin-top: 30px;
             padding: 15px 25px;
